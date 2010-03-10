@@ -1,0 +1,10 @@
+{
+	"id": "net.thauvin.erik.webos.pingfm",
+	"version": "1.0.0",
+	"vendor": "Erik C. Thauvin",
+	"type": "web",
+	"theme": "light",
+	"main": "index.html",
+	"title": "Ping.fm",
+	"icon": "icon.png"
+}

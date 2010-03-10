@@ -1,0 +1,38 @@
+/* Header Styles  */
+.header-icon.mini-icon {
+    background: url(../images/mini-icon.png) center center no-repeat;
+    width: 33px;
+    height: 32px;
+}
+
+/* Main Scene Styles */
+#messageField {
+    font-size: 12pt;
+    min-height: 110px !important;
+}
+
+#messageField textarea, #titleField, #titleField input {
+    font-size: 12pt;
+}
+
+#cntLabel {
+    margin-top: -35px;
+    margin-bottom: -10px;
+}
+
+/* KeyDialog Styles */
+#keyDialogTitle {
+    padding-bottom: 5px;
+}
+
+#keyDialogSubTitle {
+    font-size: 12pt;
+    margin-bottom: 10px;
+    text-align: right;
+}
+
+/* AppMenu */
+#palm-app-menu {
+    /* No capitalization */
+    text-transform: none;
+}
