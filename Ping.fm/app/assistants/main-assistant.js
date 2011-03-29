@@ -169,7 +169,8 @@ MainAssistant.prototype.setup = function()
     this.cookieData = new Mojo.Model.Cookie('netThauvinErikWebOsPingFm');
     this.prefs = this.cookieData.get();
     
-    this.api_key = 'edb93979c2abd58781f72d96f042e3a4';
+    //this.api_key = 'edb93979c2abd58781f72d96f042e3a4';
+	this.api_key = 'e67b1c8c335bfc67cbd729d7a4535092';
     this.messageMaxLen = 140;
     
     this.defaultMethods = [
