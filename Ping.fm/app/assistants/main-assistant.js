@@ -153,13 +153,36 @@ KeyDialogAssistant.prototype.activate = function(event)
 // ---------------------------------------------------------------------------
 // MainAssistant
 // ---------------------------------------------------------------------------
-function MainAssistant()
+function MainAssistant(args)
 {
+    Mojo.Log.info('args: ' + args);
+    
+    this.launchParams = 
+        {
+            method: '',
+            title: '',
+            message: ''
+        };
+    
+    if (args.method) 
+    {
+        this.launchParams.method = args.method;
+    }
+    
+    if (args.message) 
+    {
+        this.launchParams.message = args.message;
+    }
+    
+    if (args.title) 
+    {
+        this.launchParams.title = args.title;
+    }
 }
 
 MainAssistant.prototype.setup = function()
 {
-    //$$('body')[0].addClassName('palm-dark');
+    // $$('body')[0].addClassName('palm-dark');
     
     this.hasConnectivity = false;
     this.checkConnectivity();
@@ -169,8 +192,7 @@ MainAssistant.prototype.setup = function()
     this.cookieData = new Mojo.Model.Cookie('netThauvinErikWebOsPingFm');
     this.prefs = this.cookieData.get();
     
-    //this.api_key = 'edb93979c2abd58781f72d96f042e3a4';
-	this.api_key = 'e67b1c8c335bfc67cbd729d7a4535092';
+    this.api_key = 'e67b1c8c335bfc67cbd729d7a4535092';
     this.messageMaxLen = 140;
     
     this.defaultMethods = [
@@ -205,6 +227,42 @@ MainAssistant.prototype.setup = function()
         this.cookieData.put(this.prefs);
     }
     
+    if (!this.launchParams.title.blank()) 
+    {
+        this.prefs.showTitle = true;
+    }
+    
+    if (!this.launchParams.method.blank()) 
+    {
+        var param;
+        var label;
+        var value;
+        
+        for (var i = 0; i < this.prefs.methods.length; i++) 
+        {
+            param = this.launchParams.method.toLowerCase();
+            value = this.prefs.methods[i].value.toLowerCase();
+            label = this.prefs.methods[i].label.toLowerCase();
+            
+            if (param.charAt(0) == '@') 
+            {
+                if (value.charAt(0) == '@') 
+                {
+                    if (label.substr(label.lastIndexOf('@'), param.length) === param) 
+                    {
+                        this.prefs.defaultMethod = this.prefs.methods[i].value;
+                        break;
+                    }
+                }
+            }
+            else if (value === param || label === param) 
+            {
+                this.prefs.defaultMethod = this.prefs.methods[i].value;
+                break;
+            }
+        }
+    }
+    
     var hasNoMethods = (this.defaultMethods.length == this.prefs.methods.length);
     
     this.updatedMethods = 
@@ -218,6 +276,7 @@ MainAssistant.prototype.setup = function()
             label: '',
             command: 'do-title'
         };
+    
     this.toggleTitleMenu();
     
     this.appMenuModel = 
@@ -263,7 +322,7 @@ MainAssistant.prototype.setup = function()
             hide: true
         }, this.titleModel = 
         {
-            value: ''
+            value: this.launchParams.title
         });
     
     this.controller.setupWidget('messageField', 
@@ -274,7 +333,7 @@ MainAssistant.prototype.setup = function()
             focusMode: Mojo.Widget.focusAppendMode
         }, this.messageModel = 
         {
-            value: ''
+            value: this.launchParams.message
         });
     
     this.pingButton = this.controller.get('pingBtn');
@@ -297,6 +356,8 @@ MainAssistant.prototype.setup = function()
     
     this.activateWindowHandler = this.activateWindow.bindAsEventListener(this);
     this.controller.listen(this.controller.stageController.document, Mojo.Event.activate, this.activateWindowHandler);
+    
+    this.updateCntLabel(this.messageModel.value.length);
 };
 
 MainAssistant.prototype.activateWindow = function()
@@ -338,13 +399,13 @@ MainAssistant.prototype.togglePingButton = function()
 
 MainAssistant.prototype.activate = function(event)
 {
-    //this.askForKey();
+    // this.askForKey();
 };
 
 MainAssistant.prototype.deactivate = function(event)
 {
     this.cookieData.put(this.prefs);
-    //this.cookieData.remove();
+    // this.cookieData.remove();
 };
 
 MainAssistant.prototype.cleanup = function()
@@ -353,7 +414,6 @@ MainAssistant.prototype.cleanup = function()
     this.controller.stopListening('messageField', Mojo.Event.propertyChange, this.handleKeyHandler);
     this.controller.stopListening(this.controller.stageController.document, Mojo.Event.activate, this.activateWindowHandler);
 };
-
 
 MainAssistant.prototype.handleCommand = function(event)
 {
@@ -369,7 +429,7 @@ MainAssistant.prototype.handleCommand = function(event)
                         onChoose: function(value)
                         {
                         },
-                        message: '<big><b>#{title} v#{version}</b></big><br/>&copy; 2010, <a href="http://mobile.thauvin.net/">Erik C. Thauvin</a><br/><br/><small>This application uses the Ping.fm API but is not endorsed or certified by <a href="http://ping.fm/">Ping.fm</a></small>'.interpolate(
+                        message: '<big><b>#{title} #{version}</b></big><br/>&copy; 2010-11, <a href="http://mobile.thauvin.net/">Erik C. Thauvin</a><br/><br/><small>This application uses the Ping.fm API but is not endorsed or certified by <a href="http://ping.fm/">Ping.fm</a></small>'.interpolate(
                             {
                                 title: Mojo.Controller.appInfo.title,
                                 version: Mojo.Controller.appInfo.version
@@ -413,7 +473,13 @@ MainAssistant.prototype.handleCommand = function(event)
 
 MainAssistant.prototype.handleKeyEvent = function(event)
 {
-    var len = this.messageMaxLen - this.messageModel.value.length;
+    this.updateCntLabel(this.messageModel.value.length);
+    this.togglePingButton();
+};
+
+MainAssistant.prototype.updateCntLabel = function(messageLength)
+{
+    var len = this.messageMaxLen - messageLength;
     
     if (len < 0) 
     {
@@ -423,8 +489,6 @@ MainAssistant.prototype.handleKeyEvent = function(event)
     {
         this.controller.get('cntLabel').update(len);
     }
-    
-    this.togglePingButton();
 };
 
 MainAssistant.prototype.askForKey = function(event)
@@ -463,7 +527,7 @@ MainAssistant.prototype.pingIt = function()
             {
                 'api_key': this.api_key,
                 'user_app_key': this.prefs.user_app_key,
-                'body': Base64.encode(message),
+                'body': Base64.encode(unescape(encodeURIComponent(message))),
                 'encoding': 'base64',
                 'debug': this.debug
             });
@@ -471,7 +535,8 @@ MainAssistant.prototype.pingIt = function()
         if (method.charAt(0) == '#') 
         {
             url = 'http://api.ping.fm/v1/user.tpost';
-            params.set('trigger', method.substring(1));
+            // toLowerCase workaround Ping.fm API bug
+            params.set('trigger', method.substring(1).toLowerCase());
         }
         else if (method.charAt(0) == '@') 
         {
@@ -486,7 +551,7 @@ MainAssistant.prototype.pingIt = function()
         var title = this.titleModel.value;
         if (title != '') 
         {
-            params.set('title', Base64.encode(title));
+            params.set('title', Base64.encode(unescape(encodeURIComponent(title))));
         }
         
         Mojo.Log.info('pingIt: ' + params.toQueryString());
@@ -649,7 +714,6 @@ MainAssistant.prototype.updateMethodsSuccess = function(transport)
     }
 };
 
-
 MainAssistant.prototype.updateMethodsFailure = function(transport)
 {
     this.transportFailure('updateMethodFailure', transport);
@@ -671,7 +735,7 @@ MainAssistant.prototype.updateTriggersSuccess = function(transport)
         for (var i = 0; i < triggers.length; i++) 
         {
             var id = '#' + triggers[i].getAttribute('id');
-            //var method = triggers[i].getAttribute('method');
+            // var method = triggers[i].getAttribute('method');
             
             this.prefs.methods.unshift(
                 {
@@ -692,7 +756,6 @@ MainAssistant.prototype.updateTriggersFailure = function(transport)
 {
     this.transportFailure('updateTriggersFailure', transport);
 };
-
 
 MainAssistant.prototype.handleConnectivity = function(status)
 {
@@ -730,4 +793,3 @@ MainAssistant.prototype.transportFailure = function(caller, transport)
             status: transport.status
         }), this.controller.window);
 };
-
