@@ -74,7 +74,7 @@ KeyDialogAssistant.prototype.checkKey = function()
     
     Mojo.Log.info('checkKey: ' + params.toQueryString());
     
-    var request = new Ajax.Request('http://api.ping.fm/v1/user.key', 
+    var request = new Ajax.Request('http://papi.cmp.sr/v1/user.key', 
         {
             method: 'post',
             parameters: params,
@@ -519,7 +519,7 @@ MainAssistant.prototype.pingIt = function()
         this.controller.modelChanged(this.pingBtnModel);
         
         var method = this.methodModel.value;
-        var url = 'http://api.ping.fm/v1/user.post';
+        var url = 'http://papi.cmp.sr/v1/user.post';
         
         this.prefs.defaultMethod = method;
         
@@ -534,7 +534,7 @@ MainAssistant.prototype.pingIt = function()
         
         if (method.charAt(0) == '#') 
         {
-            url = 'http://api.ping.fm/v1/user.tpost';
+            url = 'http://papi.cmp.sr/v1/user.tpost';
             // toLowerCase workaround Ping.fm API bug
             params.set('trigger', method.substring(1).toLowerCase());
         }
@@ -647,7 +647,7 @@ MainAssistant.prototype.updateMethods = function()
         
         if (this.updatedMethods.hasNoServices) 
         {
-            request = new Ajax.Request('http://api.ping.fm/v1/user.services', 
+            request = new Ajax.Request('http://papi.cmp.sr/v1/user.services', 
                 {
                     method: 'post',
                     parameters: 
@@ -663,7 +663,7 @@ MainAssistant.prototype.updateMethods = function()
         
         if (this.updatedMethods.hasNoTargets) 
         {
-            request = new Ajax.Request('http://api.ping.fm/v1/user.triggers', 
+            request = new Ajax.Request('http://papi.cmp.sr/v1/user.triggers', 
                 {
                     method: 'post',
                     parameters: 
